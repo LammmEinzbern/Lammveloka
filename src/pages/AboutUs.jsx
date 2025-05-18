@@ -8,17 +8,13 @@ const AboutUs = () => {
 
   useEffect(() => {
     const fetchHeroImage = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("negara_asia")
         .select("foto_wisata")
         .limit(1)
         .single();
-
-      if (!error && data) {
-        setHeroImage(data.foto_wisata);
-      }
+      if (data) setHeroImage(data.foto_wisata);
     };
-
     fetchHeroImage();
   }, []);
 
@@ -27,113 +23,89 @@ const AboutUs = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative w-full h-[500px] overflow-hidden">
-        <div className="absolute inset-0">
-          {heroImage ? (
-            <img
-              src={heroImage}
-              alt="Tentang Kami - Lammveloka"
-              className="w-full h-full object-cover brightness-[0.6] transition-all duration-1000 ease-in-out"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-pulse" />
-          )}
-        </div>
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide drop-shadow-lg animate-fade-in">
-            Tentang Kami
-          </h1>
-          <p className="mt-4 text-lg max-w-2xl animate-fade-in text-gray-200">
-            Selamat datang di{" "}
-            <span className="font-semibold text-white">Lammveloka</span>,
-            website informasi wisata terbaik yang akan membawa Anda menjelajahi
-            keindahan negara-negara di Asia!
-          </p>
+      <section className="relative w-full h-[450px]">
+        {heroImage ? (
+          <img
+            src={heroImage}
+            alt="Tentang Kami"
+            className="absolute inset-0 w-full h-full object-cover brightness-50 dark:brightness-75 transition-opacity duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse" />
+        )}
+        <div className="absolute inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center text-center text-white">
+          <div className="px-6 animate-fade-in">
+            <h1 className="text-4xl font-bold mb-3">Tentang Kami</h1>
+            <p className="text-lg max-w-xl mx-auto">
+              Lammveloka menyajikan informasi wisata terbaik dari berbagai
+              penjuru Asia.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-gray-800 mb-6">Siapa Kami?</h2>
-          <p className="text-lg text-gray-600">
-            Lammveloka adalah platform yang didedikasikan untuk memberikan
-            informasi akurat, inspiratif, dan terkini tentang berbagai tempat
-            wisata di Asia. Kami percaya bahwa setiap perjalanan adalah sebuah
-            pengalaman berharga, dan kami ingin membantu Anda merencanakan
-            petualangan terbaik!
-          </p>
-        </div>
+      {/* Siapa Kami */}
+      <section className="py-14 bg-white dark:bg-gray-900 px-6 text-center animate-fade-in">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+          Siapa Kami?
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          Kami adalah platform yang membantu Anda menjelajahi tempat wisata,
+          budaya, dan kuliner khas Asia dengan informasi terpercaya dan
+          inspiratif.
+        </p>
       </section>
 
-      {/* Our Services */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-gray-800 text-center mb-12">
-            Apa yang Kami Tawarkan?
+      {/* Layanan Kami */}
+      <section className="py-14 bg-gray-50 dark:bg-gray-800 animate-fade-in">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-10">
+            Layanan Kami
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
             {[
-              {
-                title: "🌍 Destinasi Wisata",
-                description:
-                  "Jelajahi pantai, gunung, kota, dan situs bersejarah terbaik di Asia.",
-              },
-              {
-                title: "🍜 Rekomendasi Kuliner",
-                description:
-                  "Cicipi makanan autentik dari berbagai negara di Asia.",
-              },
-              {
-                title: "🎭 Event & Festival",
-                description:
-                  "Ikuti perayaan budaya dan acara menarik yang hanya ada di Asia.",
-              },
-            ].map((service, index) => (
+              ["🌍 Destinasi", "Tempat wisata terbaik dari seluruh Asia."],
+              ["🍜 Kuliner", "Rekomendasi makanan khas tiap negara."],
+              ["🎭 Festival", "Event dan perayaan budaya menarik."],
+            ].map(([title, desc], i) => (
               <div
-                key={index}
-                className="p-6 bg-gray-100 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
+                key={i}
+                className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-md hover:shadow-lg transition duration-300"
               >
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {service.title}
+                <h3 className="text-xl font-semibold mb-2 dark:text-white">
+                  {title}
                 </h3>
-                <p className="text-gray-600 mt-2">{service.description}</p>
+                <p className="text-gray-600 dark:text-gray-300">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-16 bg-blue-600 text-white text-center">
-        <h2 className="text-4xl font-bold mb-6">Misi Kami</h2>
-        <p className="max-w-3xl mx-auto text-lg">
-          Kami ingin menjadi panduan perjalanan digital terbaik bagi siapa saja
-          yang ingin menjelajahi Asia. Dengan informasi yang lengkap dan akurat,
-          kami berharap bisa membuat perjalanan Anda lebih mudah, aman, dan tak
-          terlupakan.
+      {/* Misi Kami */}
+      <section className="py-14 bg-blue-600 dark:bg-blue-800 text-white text-center px-6 animate-fade-in">
+        <h2 className="text-3xl font-bold mb-4">Misi Kami</h2>
+        <p className="max-w-3xl mx-auto leading-relaxed">
+          Menjadi panduan digital terbaik bagi siapa pun yang ingin menjelajah
+          Asia secara mudah, aman, dan menyenangkan.
         </p>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-16 bg-gray-50 text-center">
-        <h2 className="text-4xl font-bold text-gray-800 mb-6">
-          Bergabunglah dengan Kami!
+      {/* Gabung Section */}
+      <section className="py-14 bg-white dark:bg-gray-900 text-center px-6 animate-fade-in">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+          Gabung Bersama Kami
         </h2>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Mari jelajahi keajaiban Asia bersama Lammveloka! Jangan ragu untuk
-          berbagi pengalaman, mencari inspirasi, dan merencanakan petualangan
-          impian Anda bersama kami.
+        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6 leading-relaxed">
+          Temukan inspirasi dan rencanakan petualangan impianmu bersama
+          Lammveloka!
         </p>
-        <div className="mt-8">
-          <a
-            href="/register"
-            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:opacity-90 transition duration-300"
-          >
-            Bergabung Sekarang
-          </a>
-        </div>
+        <a
+          href="/register"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow transition duration-300"
+        >
+          Daftar Sekarang
+        </a>
       </section>
 
       <Footer />

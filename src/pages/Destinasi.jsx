@@ -1,22 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/SupaWorld";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Destinasi = () => {
   const [destinations, setDestinations] = useState([]);
-  const [categories] = useState([
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 6;
+
+  const navigate = useNavigate();
+
+  const categories = [
     "Semua",
     "Asia Tenggara",
-    "Asia Selatan",
     "Asia Timur",
+    "Asia Selatan",
+    "Asia Tengah",
     "Asia Barat",
-  ]);
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+    "Asia Utara",
+  ];
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
 
   const truncateText = (text, maxLength) =>
     text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -24,16 +38,29 @@ const Destinasi = () => {
   const fetchDestinations = async () => {
     setLoading(true);
     try {
-      let query = supabase.from("negara_asia").select("*");
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+
+      let query = supabase
+        .from("negara_asia")
+        .select("*", { count: "exact" })
+        .range(from, to);
+
       if (selectedCategory !== "Semua") {
         query = query.eq("kategori_tempat", selectedCategory);
       }
 
-      const { data, error } = await query;
+      const { data, count, error } = await query;
       if (error) throw error;
-      setDestinations(data);
-    } catch (error) {
-      console.error("Error fetching destinations:", error);
+
+      const filteredData = data.filter((dest) =>
+        dest.nama_tempat?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      setDestinations(filteredData);
+      setTotalItems(count);
+    } catch (err) {
+      console.error("Gagal mengambil data:", err);
     } finally {
       setLoading(false);
     }
@@ -41,111 +68,134 @@ const Destinasi = () => {
 
   useEffect(() => {
     fetchDestinations();
-  }, [selectedCategory]);
+  }, [selectedCategory, currentPage, searchQuery]);
 
-  const filteredDestinations = destinations.filter((d) =>
-    d.nama_tempat.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const renderSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6 lg:px-10">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={index}
-          className="bg-gray-200 animate-pulse rounded-xl shadow-lg overflow-hidden"
-        >
-          <div className="h-48 bg-gray-300"></div>
-          <div className="p-4 space-y-3">
-            <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
-            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
-    <div className="bg-gray-100 min-h-screen flex">
-      {/* Sidebar */}
+    <section className="bg-gray-100 dark:bg-gray-900 min-h-screen flex">
+      <Header />
       <Sidebar
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
+        onCategorySelect={handleCategorySelect}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
-        <Header />
+      <div className="flex-1 lg:ml-64 py-16 px-6 mt-10">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white text-center mb-6">
+          Destinasi Populer
+        </h2>
 
-        <div className="text-center py-24 px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-800">
-            Destinasi Wisata di Asia
-          </h1>
-          <p className="text-lg text-gray-600 mt-2">
-            Temukan berbagai tempat wisata menarik di seluruh penjuru Asia 🌏
-          </p>
-
-          {/* Search */}
-          <div className="mt-6 flex justify-center">
-            <input
-              type="text"
-              placeholder="Cari destinasi..."
-              className="w-full max-w-lg px-5 py-3 border border-blue-300 focus:ring-2 focus:ring-blue-600 rounded-full shadow-md text-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        {/* 🔍 Search */}
+        <div className="mb-6 max-w-md mx-auto">
+          <input
+            type="text"
+            placeholder="Cari destinasi..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-400 dark:bg-gray-800 dark:text-white"
+          />
         </div>
 
-        {/* Destinasi Grid */}
-        <div className="px-6 lg:px-10 pb-16">
-          {loading ? (
-            renderSkeleton()
-          ) : filteredDestinations.length === 0 ? (
-            <p className="text-center text-gray-500 text-lg">
-              Destinasi tidak ditemukan.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-              {filteredDestinations.map((destination) => (
+        {/* ✅ Content */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+              >
+                <Skeleton height={192} width="100%" />
+                <div className="p-4">
+                  <Skeleton height={24} width="80%" />
+                  <Skeleton
+                    height={16}
+                    width="100%"
+                    style={{ marginTop: "8px" }}
+                  />
+                  <Skeleton height={16} width="90%" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : destinations.length === 0 ? (
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            Tidak ada data ditemukan.
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {destinations.map((dest) => (
                 <div
-                  key={destination.id}
-                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  key={dest.id}
+                  onClick={() => navigate(`/destinations/${dest.id}`)}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl cursor-pointer transition duration-300"
                 >
-                  <div className="relative">
-                    <img
-                      src={destination.foto_wisata}
-                      alt={destination.nama_tempat}
-                      className="w-full h-48 object-cover hover:blur-sm transition-all duration-300"
-                    />
-                    <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded shadow-md">
-                      {destination.kategori_tempat}
-                    </span>
-                  </div>
-                  <div className="p-5">
-                    <h2 className="text-xl font-semibold text-blue-800 hover:text-blue-600 transition">
-                      {truncateText(destination.nama_tempat, 15)}
-                    </h2>
-                    <p className="text-gray-600 mt-2">
-                      {truncateText(destination.deskripsi_tempat, 100)}
+                  <img
+                    src={
+                      dest.foto_wisata ||
+                      "https://via.placeholder.com/400x200?text=No+Image"
+                    }
+                    alt={dest.nama_tempat}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                      {truncateText(dest.nama_tempat, 20)}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mt-2">
+                      {truncateText(dest.deskripsi_tempat || "", 100)}
                     </p>
-                    <Link
-                      to={`/destinations/${destination.id}`}
-                      className="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                    >
-                      Telusuri
-                    </Link>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
 
-        <Footer />
+            {/* 🌐 Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-8 space-x-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50"
+                >
+                  Prev
+                </button>
+
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === index + 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </section>
   );
 };
 
