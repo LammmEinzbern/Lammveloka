@@ -3,8 +3,6 @@ import { supabase } from "../utils/SupaWorld";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
 
 const Destinasi = () => {
   const [destinations, setDestinations] = useState([]);
@@ -50,14 +48,14 @@ const Destinasi = () => {
         query = query.eq("kategori_tempat", selectedCategory);
       }
 
+      if (searchQuery.trim() !== "") {
+        query = query.ilike("nama_tempat", `%${searchQuery}%`);
+      }
+
       const { data, count, error } = await query;
       if (error) throw error;
 
-      const filteredData = data.filter((dest) =>
-        dest.nama_tempat?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-      setDestinations(filteredData);
+      setDestinations(data);
       setTotalItems(count);
     } catch (err) {
       console.error("Gagal mengambil data:", err);
@@ -83,7 +81,7 @@ const Destinasi = () => {
 
       <div className="flex-1 lg:ml-64 py-16 px-6 mt-10">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white text-center mb-6">
-          Destinasi Populer
+          Destinasi Wisata
         </h2>
 
         {/* 🔍 Search */}
@@ -96,7 +94,9 @@ const Destinasi = () => {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-400 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm
+                       focus:outline-none focus:ring focus:border-blue-400
+                       dark:bg-gray-800 dark:text-white transition"
           />
         </div>
 
@@ -106,17 +106,13 @@ const Destinasi = () => {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden animate-pulse"
               >
-                <Skeleton height={192} width="100%" />
-                <div className="p-4">
-                  <Skeleton height={24} width="80%" />
-                  <Skeleton
-                    height={16}
-                    width="100%"
-                    style={{ marginTop: "8px" }}
-                  />
-                  <Skeleton height={16} width="90%" />
+                <div className="h-48 bg-gray-300 dark:bg-gray-600 w-full"></div>
+                <div className="p-4 space-y-2">
+                  <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-5/6"></div>
                 </div>
               </div>
             ))}
@@ -132,7 +128,8 @@ const Destinasi = () => {
                 <div
                   key={dest.id}
                   onClick={() => navigate(`/destinations/${dest.id}`)}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl cursor-pointer transition duration-300"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer
+                             hover:shadow-xl hover:scale-105 transform transition duration-300 ease-in-out"
                 >
                   <img
                     src={
@@ -143,10 +140,10 @@ const Destinasi = () => {
                     className="w-full h-48 object-cover"
                   />
                   <div className="p-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white truncate">
                       {truncateText(dest.nama_tempat, 20)}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mt-2">
+                    <p className="text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
                       {truncateText(dest.deskripsi_tempat || "", 100)}
                     </p>
                   </div>
@@ -162,7 +159,8 @@ const Destinasi = () => {
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50"
+                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white
+                             hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors duration-200"
                 >
                   Prev
                 </button>
@@ -171,7 +169,7 @@ const Destinasi = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentPage(index + 1)}
-                    className={`px-3 py-1 rounded ${
+                    className={`px-3 py-1 rounded transition-colors duration-200 ${
                       currentPage === index + 1
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500"
@@ -186,7 +184,8 @@ const Destinasi = () => {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50"
+                  className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-white
+                             hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors duration-200"
                 >
                   Next
                 </button>

@@ -19,7 +19,7 @@ const Register = () => {
         icon: "success",
         title: "Registrasi Berhasil",
         text: "Silakan login dengan akun Anda.",
-        confirmButtonColor: "#2563eb", // Tailwind blue-600
+        confirmButtonColor: "#2563eb",
       }).then(() => {
         navigate("/login");
       });
@@ -27,31 +27,29 @@ const Register = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-blue-900 relative bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1518684079-d8e1ec18d5c8?auto=format&fit=crop&w=1920&q=80')",
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm"></div>
-
-      {/* Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/10 border border-gray-500 rounded-2xl shadow-xl p-8 backdrop-blur-md">
-        <h2 className="text-3xl font-bold text-white text-center mb-6">
-          Buat Akun Baru
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-[#00c6ff] to-[#0072ff] px-6">
+      <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-10 flex flex-col relative">
+        <h2 className="text-4xl font-bold text-blue-700 mb-8 text-center tracking-tight">
+          Lammveloka
         </h2>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <p className="text-center text-gray-600 mb-6 font-semibold">
+          Buat akun baru untuk mulai menjelajah!
+        </p>
 
-        <form onSubmit={handleRegister} className="space-y-5">
+        {error && (
+          <p className="bg-red-100 text-red-700 text-center rounded-md py-2 mb-6 font-medium">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={handleRegister} className="space-y-6">
           <input
             type="text"
             placeholder="Nama Lengkap"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full p-3 bg-white/10 border border-gray-300 text-white rounded-lg placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition placeholder-gray-400"
             required
           />
           <input
@@ -59,7 +57,7 @@ const Register = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 bg-white/10 border border-gray-300 text-white rounded-lg placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition placeholder-gray-400"
             required
           />
           <input
@@ -67,23 +65,23 @@ const Register = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-white/10 border border-gray-300 text-white rounded-lg placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition placeholder-gray-400"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 transition duration-300 text-white font-bold py-3 rounded-lg shadow-md"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow-md transition duration-300 disabled:opacity-60"
           >
             {loading ? "Mendaftar..." : "Daftar"}
           </button>
         </form>
 
-        <p className="text-center text-gray-300 mt-6">
+        <p className="text-center text-gray-700 mt-8 text-sm">
           Sudah punya akun?{" "}
           <Link
             to="/login"
-            className="text-blue-400 font-semibold hover:underline"
+            className="text-blue-600 font-semibold hover:underline"
           >
             Masuk
           </Link>
