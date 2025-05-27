@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { supabase } from "../utils/SupaWorld";
 import Footer from "../components/Footer";
+import { supabase } from "../utils/SupaWorld";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -23,8 +23,7 @@ const SkeletonCard = () => (
 const Home = () => {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // State untuk trigger animasi
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
   const fetchDestinations = async () => {
@@ -33,20 +32,38 @@ const Home = () => {
       if (error) throw error;
       setDestinations(data);
     } catch (error) {
-      console.error("Gagal ambil data:", error.message);
+      console.error("Gagal ambil data destinasi:", error.message);
     } finally {
       setLoading(false);
-      setLoaded(true); // trigger animasi muncul
+      setLoaded(true);
+    }
+  };
+
+  const fetchFeedbacks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("contact_us")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setFeedbacks(data);
+    } catch (error) {
+      console.error("Gagal ambil feedback:", error.message);
     }
   };
 
   useEffect(() => {
     fetchDestinations();
+    fetchFeedbacks();
   }, []);
 
   return (
     <div className="font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Helmet>{/* ...meta tags sama seperti sebelumnya */}</Helmet>
+      <Helmet>
+        <title>Beranda - Jelajah Asia</title>
+        <meta name="description" content="Temukan destinasi terbaik di Asia" />
+      </Helmet>
 
       <Header />
 
@@ -183,6 +200,43 @@ const Home = () => {
         >
           Mulai Sekarang
         </Link>
+      </section>
+
+      {/* Feedback Section */}
+      <section className="py-16 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2
+            className={`text-2xl sm:text-3xl font-bold mb-10
+              transition-opacity duration-700 ease-in-out
+              ${loaded ? "opacity-100" : "opacity-0"}
+              transform ${loaded ? "translate-y-0" : "translate-y-6"}
+            `}
+          >
+            Apa Kata Mereka?
+          </h2>
+          {feedbacks.length === 0 ? (
+            <p className="text-gray-600 dark:text-gray-400">
+              Belum ada feedback.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {feedbacks.slice(0, 6).map((fb, index) => (
+                <div
+                  key={index}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform hover:scale-105 duration-300"
+                >
+                  <p className="text-sm sm:text-base italic mb-4 text-gray-700 dark:text-gray-300">
+                    "{fb.message}"
+                  </p>
+                  <hr className="border-gray-300 dark:border-gray-700 mb-2" />
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+                    - {fb.nama} ({fb.email})
+                  </h4>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       <Footer />

@@ -120,12 +120,6 @@ const Header = () => {
                 >
                   Profile
                 </NavLink>
-                <button
-                  onClick={logout}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Logout
-                </button>
               </div>
             </div>
           ) : (

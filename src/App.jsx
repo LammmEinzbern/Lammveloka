@@ -15,8 +15,9 @@ const App = () => {
   const { checkSession } = useAuthStore();
 
   useEffect(() => {
-    checkSession(); // Cek apakah user masih login setelah refresh
-  }, [checkSession]);
+    useAuthStore.getState().checkSession();
+  }, []);
+
   return (
     <Router>
       <div className=" min-h-screen">

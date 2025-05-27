@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/SupaWorld";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const [destinasi, setDestinasi] = useState([]);
@@ -23,6 +23,21 @@ const AdminDashboard = () => {
   });
 
   const navigate = useNavigate();
+
+  const fieldLabels = {
+    nama_tempat: "Nama Tempat Wisata",
+    nama_negara: "Nama Negara",
+    deskripsi_tempat: "Deskripsi Tempat Wisata",
+    kategori_tempat: "Kategori Tempat",
+    foto_wisata: "Link Foto Wisata",
+    tempat_alam: "Nama Tempat Alam 1",
+    foto_alam: "Link Foto Alam 1",
+    deskripsi_alam: "Deskripsi Tempat Alam 1",
+    tempat_alam2: "Nama Tempat Alam 2",
+    foto_alam2: "Link Foto Alam 2",
+    deskripsi_alam2: "Deskripsi Tempat Alam 2",
+    link: "Link Maps atau Website",
+  };
 
   const fetchData = async () => {
     const { data, error } = await supabase.from("negara_asia").select("*");
@@ -80,8 +95,9 @@ const AdminDashboard = () => {
   };
 
   const handleEdit = (item) => {
-    setFormData(item);
-    setEditingId(item.id);
+    const { id, ...dataWithoutId } = item;
+    setFormData(dataWithoutId);
+    setEditingId(id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -115,6 +131,12 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-900 text-white px-4 py-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
+        <NavLink
+          to={"/"}
+          className="bg-white h-10 w-16 text-center rounded-lg text-black font-bold "
+        >
+          kembali
+        </NavLink>
         <h1 className="text-3xl font-bold">Dashboard Admin 👑</h1>
         <button
           onClick={handleLogout}
@@ -134,15 +156,20 @@ const AdminDashboard = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           {Object.entries(formData).map(([key, value]) => (
-            <input
-              key={key}
-              type="text"
-              name={key}
-              value={value}
-              onChange={handleChange}
-              placeholder={key}
-              className="p-2 rounded bg-gray-700 placeholder-gray-400"
-            />
+            <div key={key} className="flex flex-col">
+              <label htmlFor={key} className="mb-1 text-sm text-gray-300">
+                {fieldLabels[key] || key}
+              </label>
+              <input
+                type="text"
+                id={key}
+                name={key}
+                value={value}
+                onChange={handleChange}
+                placeholder={fieldLabels[key] || key}
+                className="p-2 rounded bg-gray-700 placeholder-gray-400"
+              />
+            </div>
           ))}
           <div className="col-span-full flex gap-2">
             <button

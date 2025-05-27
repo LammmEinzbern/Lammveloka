@@ -64,9 +64,9 @@ const AboutUs = () => {
           </h2>
           <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
             {[
-              ["🌍 Destinasi", "Tempat wisata terbaik dari seluruh Asia."],
-              ["🍜 Kuliner", "Rekomendasi makanan khas tiap negara."],
-              ["🎭 Festival", "Event dan perayaan budaya menarik."],
+              ["Destinasi", "Tempat wisata terbaik dari seluruh Asia."],
+              ["Kuliner", "Rekomendasi makanan khas tiap negara."],
+              ["Festival", "Event dan perayaan budaya menarik."],
             ].map(([title, desc], i) => (
               <div
                 key={i}

@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { supabase } from "../utils/SupaWorld";
+import { useNavigate } from "react-router-dom";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({ nama: "", email: "", pesan: "" });
   const [darkMode, setDarkMode] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
+  // Cek tema dark mode
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
     if (storedTheme === "dark") {
@@ -17,14 +22,59 @@ const ContactUs = () => {
     }
   }, []);
 
+  // Cek status login dan ambil data profil
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const currentUser = session?.user;
+      setUser(currentUser);
+
+      if (currentUser) {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (profile) {
+          setFormData((prev) => ({
+            ...prev,
+            nama: profile.full_name || "",
+            email: profile.email || "",
+          }));
+        } else if (error) {
+          console.error("Gagal mengambil profil:", error.message);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Pesan berhasil dikirim!");
-    console.log("Form Terkirim", formData);
-    setFormData({ nama: "", email: "", pesan: "" });
+
+    const { data, error } = await supabase.from("contact_us").insert([
+      {
+        nama: formData.nama,
+        email: formData.email,
+        message: formData.pesan,
+      },
+    ]);
+
+    if (error) {
+      console.error("Gagal mengirim pesan:", error.message);
+      alert("Terjadi kesalahan saat mengirim pesan.");
+    } else {
+      alert("Pesan berhasil dikirim!");
+      setFormData({ ...formData, pesan: "" }); // kosongkan hanya pesan
+    }
   };
 
   return (
@@ -39,6 +89,7 @@ const ContactUs = () => {
         <p className="text-center text-gray-600 dark:text-gray-400 mb-12">
           Ada pertanyaan? Silakan isi formulir di bawah ini atau hubungi kami.
         </p>
+
         <div className="flex flex-col lg:flex-row gap-12">
           <div className="w-full lg:w-1/2 space-y-6 text-blue-700 dark:text-blue-400">
             <div>
@@ -68,67 +119,79 @@ const ContactUs = () => {
             </div>
           </div>
 
-          {/* Formulir */}
+          {/* Formulir atau tombol login */}
           <div className="w-full lg:w-1/2 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transition-colors duration-300">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="nama"
-                  className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
+            {user ? (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="nama"
+                    className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
+                  >
+                    Nama Lengkap
+                  </label>
+                  <input
+                    type="text"
+                    id="nama"
+                    name="nama"
+                    value={formData.nama}
+                    readOnly
+                    className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    readOnly
+                    className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="pesan"
+                    className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
+                  >
+                    Pesan
+                  </label>
+                  <textarea
+                    id="pesan"
+                    name="pesan"
+                    value={formData.pesan}
+                    onChange={handleChange}
+                    rows="5"
+                    required
+                    className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
                 >
-                  Nama Lengkap
-                </label>
-                <input
-                  type="text"
-                  id="nama"
-                  name="nama"
-                  value={formData.nama}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
+                  Kirim Feedback
+                </button>
+              </form>
+            ) : (
+              <div className="text-center">
+                <p className="mb-4 text-gray-600 dark:text-gray-300">
+                  Kamu harus login untuk memberikan feedback.
+                </p>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
                 >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500"
-                />
+                  Login untuk mengirim feedback
+                </button>
               </div>
-              <div>
-                <label
-                  htmlFor="pesan"
-                  className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-1"
-                >
-                  Pesan
-                </label>
-                <textarea
-                  id="pesan"
-                  name="pesan"
-                  value={formData.pesan}
-                  onChange={handleChange}
-                  rows="5"
-                  required
-                  className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring focus:ring-blue-500"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
-              >
-                Kirim Pesan
-              </button>
-            </form>
+            )}
           </div>
         </div>
 

@@ -11,8 +11,9 @@ const Destinasi = () => {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 6;
+  const [showSidebar, setShowSidebar] = useState(false);
 
+  const itemsPerPage = 6;
   const navigate = useNavigate();
 
   const categories = [
@@ -28,6 +29,7 @@ const Destinasi = () => {
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
     setCurrentPage(1);
+    setShowSidebar(false);
   };
 
   const truncateText = (text, maxLength) =>
@@ -71,23 +73,49 @@ const Destinasi = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
-    <section className="bg-gray-100 dark:bg-gray-900 min-h-screen flex">
-      <div className="w-1/5">
-        <Sidebar
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
-        />
+    <section className="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
+      {/* Sidebar */}
+      <div className="md:w-1/5">
+        <div className="md:block hidden">
+          <Sidebar
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+
+        {/* Mobile Sidebar Toggle */}
+        <div className="md:hidden bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Destinasi</h2>
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="text-white focus:outline-none"
+          >
+            ☰
+          </button>
+        </div>
+
+        {showSidebar && (
+          <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg p-4">
+            <Sidebar
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={handleCategorySelect}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="w-4/5 flex flex-col">
+      {/* Main Content */}
+      <div className="md:w-4/5 w-full flex flex-col">
         <Header />
 
-        <div className="flex-1 py-16 px-6 mt-10">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-white text-center mb-10">
+        <div className="flex-1 py-10 px-4 sm:px-6 md:px-8 mt-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white text-center mb-8">
             Destinasi Wisata
           </h2>
 
+          {/* Search Input */}
           <div className="mb-6 max-w-md mx-auto">
             <input
               type="text"
@@ -103,8 +131,9 @@ const Destinasi = () => {
             />
           </div>
 
+          {/* Cards */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: itemsPerPage }).map((_, idx) => (
                 <div
                   key={idx}
@@ -125,7 +154,7 @@ const Destinasi = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {destinations.map((dest) => (
                   <div
                     key={dest.id}
@@ -142,7 +171,7 @@ const Destinasi = () => {
                       className="w-full h-48 object-cover"
                     />
                     <div className="p-4">
-                      <h3 className="text-xl font-bold text-gray-800 dark:text-white truncate">
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate">
                         {truncateText(dest.nama_tempat, 20)}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
@@ -153,8 +182,9 @@ const Destinasi = () => {
                 ))}
               </div>
 
+              {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center mt-8 space-x-2">
+                <div className="flex flex-wrap justify-center items-center mt-8 gap-2">
                   <button
                     onClick={() =>
                       setCurrentPage((prev) => Math.max(prev - 1, 1))

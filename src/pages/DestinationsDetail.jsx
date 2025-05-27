@@ -73,7 +73,7 @@ const DestinasiDetail = () => {
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block"
               >
-                🌐 Kunjungi Website Resmi
+                🌐 Kunjungi Website Traveloka
               </a>
             )
           )}
@@ -90,7 +90,7 @@ const DestinasiDetail = () => {
           destinasi?.tempat_alam && (
             <div className="border-t border-gray-300 dark:border-gray-700 pt-6 space-y-2">
               <h3 className="text-gray-900 dark:text-gray-100 text-xl sm:text-2xl font-semibold">
-                🏞️ {destinasi.tempat_alam}
+                {destinasi.tempat_alam}
               </h3>
               {destinasi.foto_alam && (
                 <img
@@ -117,7 +117,7 @@ const DestinasiDetail = () => {
           destinasi?.tempat_alam2 && (
             <div className="border-t border-gray-300 dark:border-gray-700 pt-6 space-y-2">
               <h3 className="text-gray-900 dark:text-gray-100 text-xl sm:text-2xl font-semibold">
-                🏞️ {destinasi.tempat_alam2}
+                {destinasi.tempat_alam2}
               </h3>
               {destinasi.foto_alam2 && (
                 <img
